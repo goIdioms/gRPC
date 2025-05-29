@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -11,9 +12,14 @@ import (
 
 type UserService struct {
 	pb.UnimplementedUserServiceServer
+	db *sql.DB
 }
 
-func (s *UserService) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
+func NewUserService(db *sql.DB) *UserService {
+	return &UserService{db: db}
+}
+
+func (s *UserService) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
 	fmt.Printf("Received CreateUser request: Name=%s, Email=%s\n", req.Name, req.Email)
 
 	user := &pb.User{
@@ -23,10 +29,10 @@ func (s *UserService) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 		CreatedAt: time.Now().Unix(),
 	}
 
-	return user, nil
+	return &pb.CreateUserResponse{User: user}, nil
 }
 
-func (s *UserService) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.User, error) {
+func (s *UserService) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
 	fmt.Printf("Received GetUser request: ID=%s\n", req.Id)
 
 	user := &pb.User{
@@ -36,7 +42,7 @@ func (s *UserService) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.
 		CreatedAt: time.Now().Unix(),
 	}
 
-	return user, nil
+	return &pb.GetUserResponse{User: user}, nil
 }
 
 func (s *UserService) ListUsers(ctx context.Context, req *pb.ListUsersRequest) (*pb.ListUsersResponse, error) {
