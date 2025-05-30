@@ -5,12 +5,18 @@ import (
 	"net"
 
 	pb "github.com/goIdioms/gRPC/api/proto/user/v1"
+	"github.com/goIdioms/gRPC/pkg/database"
 	"github.com/goIdioms/gRPC/services/user-service/internal/service"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	// Создаем сервис без подключения к базе данных
+	db, err := database.InitDB()
+	if err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
+	defer db.Close()
+
 	userService := service.NewUserService(nil)
 
 	server := grpc.NewServer()

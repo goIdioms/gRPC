@@ -4,14 +4,13 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/goIdioms/gRPC/pkg/config"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func InitDB() (*sql.DB, error) {
-	config, err := config.LoadConfig("/Users/az/Desktop/gRPC/config")
+	config, err := config.LoadConfig("../")
 	if err != nil {
 		return nil, fmt.Errorf("ошибка загрузки конфигурации: %w", err)
 	}
@@ -23,11 +22,6 @@ func InitDB() (*sql.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ошибка открытия соединения с БД: %w", err)
 	}
-
-	db.SetMaxOpenConns(25)
-	db.SetMaxIdleConns(5)
-	db.SetConnMaxLifetime(5 * time.Minute)
-	db.SetConnMaxIdleTime(1 * time.Minute)
 
 	if err := db.Ping(); err != nil {
 		db.Close()
