@@ -4,37 +4,21 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
+	"github.com/goIdioms/gRPC/pkg/config"
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/joho/godotenv"
 )
 
 func InitDB() (*sql.DB, error) {
-	if err := godotenv.Load(); err != nil {
-		log.Println("Не удалось загрузить .env файл:", err)
+	config, err := config.LoadConfig("/Users/az/Desktop/gRPC/config")
+	if err != nil {
+		return nil, fmt.Errorf("ошибка загрузки конфигурации: %w", err)
 	}
-	dsn := os.Getenv("DATABASE_URL")
 
-	if dsn == "" {
-		pgHost := os.Getenv("PGHOST")
-		pgPort := os.Getenv("PGPORT")
-		pgUser := os.Getenv("PGUSER")
-		pgPassword := os.Getenv("PGPASSWORD")
-		pgDatabase := os.Getenv("PGDATABASE")
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		config.DBUser, config.DBPass, config.DBHost, config.DBPort, config.DBName)
 
-		if pgHost == "" || pgUser == "" || pgDatabase == "" {
-			return nil, fmt.Errorf("отсутствуют обязательные переменные окружения (PGHOST, PGUSER, PGDATABASE)")
-		}
-
-		if pgPort == "" {
-			pgPort = "5432"
-		}
-
-		dsn = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
-			pgUser, pgPassword, pgHost, pgPort, pgDatabase)
-	}
 	db, err := sql.Open("pgx", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка открытия соединения с БД: %w", err)
