@@ -2,20 +2,20 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	pb "github.com/goIdioms/gRPC/api/proto/user/v1"
+	"github.com/goIdioms/gRPC/services/user-service/internal/repository"
 	"github.com/google/uuid"
 )
 
 type UserService struct {
 	pb.UnimplementedUserServiceServer
-	db *sql.DB
+	repo *repository.UserRepository
 }
 
-func NewUserService(db *sql.DB) *UserService {
-	return &UserService{db: db}
+func NewUserService(repo *repository.UserRepository) *UserService {
+	return &UserService{repo: repo}
 }
 
 func (s *UserService) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {

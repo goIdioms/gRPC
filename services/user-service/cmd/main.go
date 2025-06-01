@@ -6,6 +6,7 @@ import (
 
 	pb "github.com/goIdioms/gRPC/api/proto/user/v1"
 	"github.com/goIdioms/gRPC/pkg/database"
+	"github.com/goIdioms/gRPC/services/user-service/internal/repository"
 	"github.com/goIdioms/gRPC/services/user-service/internal/service"
 	"google.golang.org/grpc"
 )
@@ -17,7 +18,8 @@ func main() {
 	}
 	defer db.Close()
 
-	userService := service.NewUserService(nil)
+	repo := repository.NewUserRepository(db)
+	userService := service.NewUserService(repo)
 
 	server := grpc.NewServer()
 	pb.RegisterUserServiceServer(server, userService)
