@@ -2,11 +2,11 @@ package service
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	pb "github.com/goIdioms/gRPC/api/proto/user/v1"
 	"github.com/goIdioms/gRPC/services/user-service/internal/grpc/mapper"
-	"github.com/goIdioms/gRPC/services/user-service/internal/models"
 	"github.com/goIdioms/gRPC/services/user-service/internal/repository"
 	"github.com/google/uuid"
 )
@@ -22,39 +22,48 @@ func NewUserService(repo *repository.UserRepository) *UserService {
 
 func (s *UserService) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
 	domainUser := mapper.ProtoToDomainUser(&pb.User{
-		Username: req.Username,
-		Email:    req.Email,
+		Id:        uuid.New().String(),
+		Username:  req.Username,
+		Email:     req.Email,
+		Password:  req.Password,
+		Phone:     req.Phone,
+		CreatedAt: time.Now().Unix(),
 	})
 
-	if err := s.repo.CreateUser(domainUser); err != nil {
-		return nil, err
+	user, err := s.repo.CreateUser(domainUser)
+	if err != nil {
+		return nil, errors.New("failed to create user")
 	}
 
-	return &pb.CreateUserResponse{User: &pb.User{
-		Id:        domainUser.Id,
-		Username:  domainUser.Username,
-		Email:     domainUser.Email,
-		CreatedAt: domainUser.CreatedAt,
-	}}, nil
+	return &pb.CreateUserResponse{
+		User: mapper.DomainToProtoUser(user),
+	}, nil
 }
 
 func (s *UserService) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
-
-	user := &models.User{
-		Id:        uuid.New().String(),
-		Username:  "John Doe",
-		Email:     "john.doe@example.com",
-		CreatedAt: time.Now().Unix(),
+	user, err := s.repo.GetUser(req.Id)
+	if err != nil {
+		return nil, errors.New("failed to get user")
 	}
 
-	return &pb.GetUserResponse{User: &pb.User{
-		Id:        user.Id,
-		Username:  user.Username,
-		Email:     user.Email,
-		CreatedAt: user.CreatedAt,
-	}}, nil
+	return &pb.GetUserResponse{
+		User: mapper.DomainToProtoUser(user),
+	}, nil
 }
 
 func (s *UserService) ListUsers(ctx context.Context, req *pb.ListUsersRequest) (*pb.ListUsersResponse, error) {
-	return &pb.ListUsersResponse{}, nil
+
+	users, err := s.repo.ListUsers()
+	if err != nil {
+		return nil, errors.New("failed to list users")
+	}
+
+	var protoUsers []*pb.User
+	for _, user := range users {
+		protoUsers = append(protoUsers, mapper.DomainToProtoUser(user))
+	}
+
+	return &pb.ListUsersResponse{
+		Users: protoUsers,
+	}, nil
 }
