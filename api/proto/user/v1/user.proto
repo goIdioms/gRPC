@@ -27,8 +27,6 @@ message User {
   int64 created_at = 7;
 }
 
-
-
 message CreateUserRequest {
   string username = 1;
   string email = 2;
@@ -42,6 +40,10 @@ message CreateUserResponse {
 
 message GetUserRequest {
   string id = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
 }
 
 message UpdateUserRequest {
@@ -108,10 +110,6 @@ message StreamUsersRequest {
 message StreamUsersResponse {
   repeated User users = 1;
   int32 total = 2;
-}
-
-message GetUserResponse {
-  User user = 1;
 }
 
 message ListUsersRequest {

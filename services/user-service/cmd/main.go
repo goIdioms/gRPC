@@ -6,8 +6,8 @@ import (
 
 	pb "github.com/goIdioms/gRPC/api/proto/user/v1"
 	"github.com/goIdioms/gRPC/pkg/database"
+	grpcService "github.com/goIdioms/gRPC/services/user-service/internal/grpc"
 	"github.com/goIdioms/gRPC/services/user-service/internal/repository"
-	"github.com/goIdioms/gRPC/services/user-service/internal/service"
 	"google.golang.org/grpc"
 )
 
@@ -19,7 +19,7 @@ func main() {
 	defer db.Close()
 
 	repo := repository.NewUserRepository(db)
-	userService := service.NewUserService(repo)
+	userService := grpcService.NewUserService(repo)
 
 	server := grpc.NewServer()
 	pb.RegisterUserServiceServer(server, userService)
@@ -29,7 +29,6 @@ func main() {
 		log.Fatal("Failed to listen:", err)
 	}
 
-	log.Println("gRPC server listening on :50051")
 	if err := server.Serve(lis); err != nil {
 		log.Fatal("Failed to serve:", err)
 	}

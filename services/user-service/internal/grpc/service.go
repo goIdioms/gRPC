@@ -5,6 +5,8 @@ import (
 	"time"
 
 	pb "github.com/goIdioms/gRPC/api/proto/user/v1"
+	"github.com/goIdioms/gRPC/services/user-service/internal/grpc/mapper"
+	"github.com/goIdioms/gRPC/services/user-service/internal/models"
 	"github.com/goIdioms/gRPC/services/user-service/internal/repository"
 	"github.com/google/uuid"
 )
@@ -19,27 +21,38 @@ func NewUserService(repo *repository.UserRepository) *UserService {
 }
 
 func (s *UserService) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
+	domainUser := mapper.ProtoToDomainUser(&pb.User{
+		Username: req.Username,
+		Email:    req.Email,
+	})
 
-	user := &pb.User{
-		Id:        uuid.New().String(),
-		Username:  req.Username,
-		Email:     req.Email,
-		CreatedAt: time.Now().Unix(),
+	if err := s.repo.CreateUser(domainUser); err != nil {
+		return nil, err
 	}
 
-	return &pb.CreateUserResponse{User: user}, nil
+	return &pb.CreateUserResponse{User: &pb.User{
+		Id:        domainUser.Id,
+		Username:  domainUser.Username,
+		Email:     domainUser.Email,
+		CreatedAt: domainUser.CreatedAt,
+	}}, nil
 }
 
 func (s *UserService) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
 
-	user := &pb.User{
+	user := &models.User{
 		Id:        uuid.New().String(),
 		Username:  "John Doe",
 		Email:     "john.doe@example.com",
 		CreatedAt: time.Now().Unix(),
 	}
 
-	return &pb.GetUserResponse{User: user}, nil
+	return &pb.GetUserResponse{User: &pb.User{
+		Id:        user.Id,
+		Username:  user.Username,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+	}}, nil
 }
 
 func (s *UserService) ListUsers(ctx context.Context, req *pb.ListUsersRequest) (*pb.ListUsersResponse, error) {
