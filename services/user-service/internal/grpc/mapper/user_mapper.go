@@ -14,6 +14,8 @@ func ProtoToDomainUser(protoUser *pb.User) *models.User {
 		Id:        protoUser.Id,
 		Username:  protoUser.Username,
 		Email:     protoUser.Email,
+		Password:  protoUser.Password,
+		Phone:     protoUser.Phone,
 		CreatedAt: protoUser.CreatedAt,
 	}
 }

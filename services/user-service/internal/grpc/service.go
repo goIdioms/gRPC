@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
+	"log"
 	"time"
 
 	pb "github.com/goIdioms/gRPC/api/proto/user/v1"
@@ -29,12 +31,15 @@ func (s *UserService) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 		Phone:     req.Phone,
 		CreatedAt: time.Now().Unix(),
 	})
+	log.Println(domainUser)
 
 	user, err := s.repo.CreateUser(domainUser)
 	if err != nil {
-		return nil, errors.New("failed to create user")
+		log.Printf("Failed to create user: %v", err)
+		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
+	log.Printf("Successfully created user with ID: %s", user.Id)
 	return &pb.CreateUserResponse{
 		User: mapper.DomainToProtoUser(user),
 	}, nil
